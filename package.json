@@ -1,0 +1,40 @@
+{
+	"name": "kanbaneon-api",
+	"version": "1.0.0",
+	"description": "Kanbaneon API server",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Kanbaneon/kanbaneon-api.git"
+	},
+	"keywords": [
+		"Kanbaneon",
+		"API",
+		"server"
+	],
+	"author": "m3yevn",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/Kanbaneon/kanbaneon-api/issues"
+	},
+	"homepage": "https://github.com/Kanbaneon/kanbaneon-api#readme",
+	"funFacts": [],
+	"badges": [],
+	"techStacks": [],
+	"publicUrl": "",
+	"screenshots": [],
+	"dependencies": {
+		"@hapi/hapi": "^21.3.9",
+		"bcrypt": "^5.1.1",
+		"boom": "^7.3.0",
+		"dotenv": "^16.4.5",
+		"joi": "^17.13.0",
+		"mongodb": "^6.5.0"
+	},
+	"devDependencies": {
+		"nodemon": "^3.1.0"
+	}
+}
