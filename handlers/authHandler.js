@@ -7,6 +7,7 @@ const loginHandler = (req, h) => {
     if (!username || !password) {
       return Boom.badRequest("Username or password is empty");
     }
+    return authService.login(username, password);
   } catch (ex) {
     throw new Error(ex);
   }
