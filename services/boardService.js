@@ -12,7 +12,14 @@ const getBoards = async (ownedBy) => {
   return { success: true, boards };
 };
 
+const getBoard = async (id) => {
+  const collection = this.$db.collection("boards");
+  const board = await collection.findOne({ id });
+  return { success: true, board };
+};
+
 module.exports = {
   addBoard,
   getBoards,
+  getBoard,
 };

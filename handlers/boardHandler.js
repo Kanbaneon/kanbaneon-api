@@ -10,6 +10,14 @@ const boardHandler = {
       throw new Error(ex);
     }
   },
+  getById: (req, h) => {
+    try {
+      const id = req.params.boardId;
+      return boardService.getBoard(id);
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
   post: (req, h) => {
     try {
       const { id, kanbanList, name } = JSON.parse(req?.payload);
