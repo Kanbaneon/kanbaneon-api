@@ -6,12 +6,16 @@ const login = async (username, password) => {
   const collection = this.$db.collection("users");
   const user = await collection.findOne({ username });
   if (!user) {
-    return Boom.forbidden("Login failed");
+    return Boom.unauthorized("Login failed");
   }
 
   const result = await bcrypt.compare(password, user.password);
-  const token = await generateJwt({ username });
-  return { success: result, token };
+  if (!result) {
+    return Boom.unauthorized("Login failed");
+  }
+
+  const token = await generateJwt({ username, id: user._id });
+  return { success: result, token, id: user._id };
 };
 
 const signUp = async (username, password) => {
@@ -19,6 +23,14 @@ const signUp = async (username, password) => {
   const hashedPassword = await hashPassword(password);
   await collection.insertOne({ username, password: hashedPassword });
   return { success: true };
+};
+
+const reauth = async (token) => {
+  const decodedData = jwt.verify(token, process.env.JWT_SECRET);
+  if (!decodedData && decodedData.exp > new Date()) {
+    return Boom.unauthorized("Reauth failed");
+  }
+  return { success: true, reauth: decodedData };
 };
 
 const generateJwt = async (payload) => {
@@ -41,4 +53,5 @@ const hashPassword = async (pwd, saltRounds = 10) => {
 module.exports = {
   login,
   signUp,
+  reauth,
 };

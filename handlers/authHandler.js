@@ -3,11 +3,23 @@ const authService = require("../services/authService");
 
 const loginHandler = (req, h) => {
   try {
-    const { username, password } = req.payload;
+    const { username, password } = JSON.parse(req.payload);
     if (!username || !password) {
       return Boom.badRequest("Username or password is empty");
     }
     return authService.login(username, password);
+  } catch (ex) {
+    throw new Error(ex);
+  }
+};
+
+const reauthHandler = (req, h) => {
+  try {
+    const { token } = JSON.parse(req.payload);
+    if (!token) {
+      return Boom.badRequest("Token is empty");
+    }
+    return authService.reauth(token);
   } catch (ex) {
     throw new Error(ex);
   }
@@ -28,4 +40,5 @@ const signUpHandler = (req, h) => {
 module.exports = {
   loginHandler,
   signUpHandler,
+  reauthHandler
 };

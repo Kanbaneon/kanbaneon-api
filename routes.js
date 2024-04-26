@@ -1,4 +1,10 @@
-const { loginHandler, signUpHandler } = require("./handlers/authHandler");
+const {
+  loginHandler,
+  signUpHandler,
+  reauthHandler,
+} = require("./handlers/authHandler");
+const { boardHandler } = require("./handlers/boardHandler");
+const { guardJwt } = require("./services/guardService");
 
 const routes = [
   {
@@ -17,6 +23,21 @@ const routes = [
     method: "post",
     path: "/api/v1/signup",
     handler: signUpHandler,
+  },
+  {
+    method: "post",
+    path: "/api/v1/reauth",
+    handler: reauthHandler,
+  },
+  {
+    method: "get",
+    path: "/api/v1/boards",
+    handler: (req, h) => guardJwt(req, h, boardHandler.get),
+  },
+  {
+    method: "post",
+    path: "/api/v1/boards",
+    handler: (req, h) => guardJwt(req, h, boardHandler.post),
   },
 ];
 
