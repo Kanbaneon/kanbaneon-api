@@ -20,6 +20,13 @@ const login = async (username, password) => {
 
 const signUp = async (username, password) => {
   const collection = this.$db.collection("users");
+  const existingUser = await collection.findOne({ username });
+  if (existingUser) {
+    return Boom.badData(
+      `There is already a user called "${username}". Try login your account`
+    );
+  }
+
   const hashedPassword = await hashPassword(password);
   await collection.insertOne({ username, password: hashedPassword });
   return { success: true };

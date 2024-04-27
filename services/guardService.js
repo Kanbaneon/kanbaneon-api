@@ -16,7 +16,7 @@ const guardJwt = (req, h, handler) => {
     req.triggered_by = decodedData;
     return handler(req, h);
   } catch (ex) {
-    return Boom.unauthorized("Token failed");
+    return Boom.unauthorized("Token failed", ex.message);
   }
 };
 

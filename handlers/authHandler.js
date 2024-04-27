@@ -27,7 +27,7 @@ const reauthHandler = (req, h) => {
 
 const signUpHandler = (req, h) => {
   try {
-    const { username, password } = req.payload;
+    const { username, password } = JSON.parse(req.payload);
     if (!username || !password) {
       return Boom.badRequest("Username or password is empty");
     }

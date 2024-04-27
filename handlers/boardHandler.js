@@ -18,6 +18,16 @@ const boardHandler = {
       throw new Error(ex);
     }
   },
+  putById: (req, h) => {
+    try {
+      const id = req.params.boardId;
+      const ownedBy = req.triggered_by.id;
+      const board = req?.payload;
+      return boardService.updateBoard(id, ownedBy, board);
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
   post: (req, h) => {
     try {
       const { id, kanbanList, name } = JSON.parse(req?.payload);

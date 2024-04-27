@@ -44,6 +44,11 @@ const routes = [
     path: "/api/v1/boards/{boardId}",
     handler: (req, h) => guardJwt(req, h, boardHandler.getById),
   },
+  {
+    method: "put",
+    path: "/api/v1/boards/{boardId}",
+    handler: (req, h) => guardJwt(req, h, boardHandler.putById),
+  },
 ];
 
 module.exports = routes;

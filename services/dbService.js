@@ -7,7 +7,7 @@ const initDB = async () => {
     const dbName = process.env.DB_NAME;
 
     await client.connect();
-    console.log("Connected successfully to server");
+    console.log("Connected successfully to DB");
     const db = client.db(dbName);
     return db;
   } catch (ex) {
