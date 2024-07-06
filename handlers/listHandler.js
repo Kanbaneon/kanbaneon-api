@@ -16,6 +16,16 @@ const listHandler = {
       throw new Error(ex);
     }
   },
+  deleteById: (req, h) => {
+    try {
+      const boardId = req.params.boardId;
+      const listId = req.params.listId;
+      const ownedBy = req.triggered_by.id;
+      return listService.deleteList(boardId, listId, ownedBy);
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
 };
 
 module.exports = { listHandler };
