@@ -49,6 +49,11 @@ const routes = [
     path: "/api/v1/boards/{boardId}",
     handler: (req, h) => guardJwt(req, h, boardHandler.putById),
   },
+  {
+    method: "delete",
+    path: "/api/v1/boards/{boardId}",
+    handler: (req, h) => guardJwt(req, h, boardHandler.deleteById),
+  },
 ];
 
 module.exports = routes;

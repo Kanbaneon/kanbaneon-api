@@ -24,11 +24,23 @@ const updateBoard = async (id, ownedBy, board) => {
       );
       return { success: true, board };
     }
-    return Boom.unauthorized(
-      new Error("Not an owner of this board")
-    );
+    return Boom.unauthorized(new Error("Not an owner of this board"));
   } catch (ex) {
     return Boom.notImplemented("Updating Board failed", ex);
+  }
+};
+
+const deleteBoard = async (id, ownedBy) => {
+  try {
+    const collection = this.$db.collection("boards");
+    const deletingBoard = await collection.findOne({ id, ownedBy });
+    if (deletingBoard) {
+      await collection.deleteOne({ id, ownedBy });
+      return { success: true, board: {} };
+    }
+    return Boom.unauthorized(new Error("Not an owner of this board"));
+  } catch (ex) {
+    return Boom.notImplemented("Deleting Board failed", ex);
   }
 };
 
@@ -46,7 +58,10 @@ const getBoard = async (id) => {
   try {
     const collection = this.$db.collection("boards");
     const board = await collection.findOne({ id });
-    return { success: true, board };
+    if (board) {
+      return { success: true, board };
+    }
+    return Boom.notFound("Getting Board by ID failed");
   } catch (ex) {
     return Boom.notFound("Getting Board by ID failed", ex);
   }
@@ -55,6 +70,7 @@ const getBoard = async (id) => {
 module.exports = {
   addBoard,
   updateBoard,
+  deleteBoard,
   getBoards,
   getBoard,
 };
