@@ -10,7 +10,7 @@ const addBoard = async (id, kanbanList, name, ownedBy) => {
   }
 };
 
-const updateBoard = async (id, ownedBy, board) => {
+const updateBoard = async (id, board, ownedBy) => {
   try {
     const collection = this.$db.collection("boards");
     const updatingBoard = await collection.findOne({ id, ownedBy });

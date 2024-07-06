@@ -4,6 +4,7 @@ const {
   reauthHandler,
 } = require("./handlers/authHandler");
 const { boardHandler } = require("./handlers/boardHandler");
+const { listHandler } = require("./handlers/listHandler");
 const { guardJwt } = require("./services/guardService");
 
 const routes = [
@@ -38,6 +39,11 @@ const routes = [
     method: "post",
     path: "/api/v1/boards",
     handler: (req, h) => guardJwt(req, h, boardHandler.post),
+  },
+  {
+    method: "post",
+    path: "/api/v1/boards/{boardId}/lists",
+    handler: (req, h) => guardJwt(req, h, listHandler.post),
   },
   {
     method: "get",

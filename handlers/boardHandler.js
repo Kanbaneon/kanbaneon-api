@@ -26,7 +26,7 @@ const boardHandler = {
         typeof req?.payload === "string"
           ? JSON.parse(req.payload)
           : req.payload;
-      return boardService.updateBoard(id, ownedBy, board);
+      return boardService.updateBoard(id, board, ownedBy);
     } catch (ex) {
       throw new Error(ex);
     }
