@@ -48,6 +48,11 @@ const routes = [
   },
   {
     method: "post",
+    path: "/api/v1/boards/{boardId}/swap-lists",
+    handler: (req, h) => guardJwt(req, h, listHandler.swap),
+  },
+  {
+    method: "post",
     path: "/api/v1/boards/{boardId}/lists/{listId}/cards",
     handler: (req, h) => guardJwt(req, h, cardHandler.post),
   },

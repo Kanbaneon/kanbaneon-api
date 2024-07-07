@@ -90,8 +90,36 @@ const deleteList = async (boardId, listId, ownedBy) => {
   }
 };
 
+const swapList = async (boardId, originalIndex, targetIndex, ownedBy) => {
+  try {
+    const collection = this.$db.collection("boards");
+    const updatingBoard = await collection.findOne({ id: boardId, ownedBy });
+    if (updatingBoard) {
+      const originalList = updatingBoard.kanbanList[originalIndex];
+      const targetList = updatingBoard.kanbanList[targetIndex];
+      updatingBoard.kanbanList[targetIndex] = { ...originalList };
+      updatingBoard.kanbanList[originalIndex] = { ...targetList };
+
+      await collection.findOneAndUpdate(
+        { id: boardId, ownedBy },
+        {
+          $set: {
+            kanbanList: updatingBoard.kanbanList,
+          },
+          $currentDate: { lastModified: true },
+        }
+      );
+      return { success: true, board: updatingBoard };
+    }
+    return Boom.unauthorized(new Error("Not an owner of this board"));
+  } catch (ex) {
+    return Boom.notImplemented("Deleting List failed", ex);
+  }
+};
+
 module.exports = {
   addList,
   updateList,
   deleteList,
+  swapList,
 };

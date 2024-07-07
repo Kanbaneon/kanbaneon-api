@@ -40,6 +40,17 @@ const listHandler = {
       throw new Error(ex);
     }
   },
+  swap: (req, h) => {
+    try {
+      const boardId = req.params.boardId;
+      const originalIndex = req.query.from;
+      const targetIndex = req.query.to;
+      const ownedBy = req.triggered_by.id;
+      return listService.swapList(boardId, originalIndex, targetIndex, ownedBy);
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
 };
 
 module.exports = { listHandler };
