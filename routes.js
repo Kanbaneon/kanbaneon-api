@@ -67,6 +67,11 @@ const routes = [
     handler: (req, h) => guardJwt(req, h, listHandler.putById),
   },
   {
+    method: "put",
+    path: "/api/v1/boards/{boardId}/lists/{listId}/cards/{cardId}",
+    handler: (req, h) => guardJwt(req, h, cardHandler.putById),
+  },
+  {
     method: "delete",
     path: "/api/v1/boards/{boardId}",
     handler: (req, h) => guardJwt(req, h, boardHandler.deleteById),
@@ -75,6 +80,11 @@ const routes = [
     method: "delete",
     path: "/api/v1/boards/{boardId}/lists/{listId}",
     handler: (req, h) => guardJwt(req, h, listHandler.deleteById),
+  },
+  {
+    method: "delete",
+    path: "/api/v1/boards/{boardId}/lists/{listId}/cards/{cardId}",
+    handler: (req, h) => guardJwt(req, h, cardHandler.deleteById),
   },
 ];
 

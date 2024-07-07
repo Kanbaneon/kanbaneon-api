@@ -21,12 +21,13 @@ const cardHandler = {
     try {
       const boardId = req.params.boardId;
       const listId = req.params.listId;
+      const cardId = req.params.cardId;
       const ownedBy = req.triggered_by.id;
-      const list =
+      const card =
         typeof req?.payload === "string"
           ? JSON.parse(req.payload)
           : req.payload;
-      return listService.updateList(boardId, listId, list, ownedBy);
+      return cardService.updateCard(boardId, listId, cardId, card, ownedBy);
     } catch (ex) {
       throw new Error(ex);
     }
@@ -35,8 +36,9 @@ const cardHandler = {
     try {
       const boardId = req.params.boardId;
       const listId = req.params.listId;
+      const cardId = req.params.cardId;
       const ownedBy = req.triggered_by.id;
-      return listService.deleteList(boardId, listId, ownedBy);
+      return cardService.deleteCard(boardId, listId, cardId, ownedBy);
     } catch (ex) {
       throw new Error(ex);
     }
