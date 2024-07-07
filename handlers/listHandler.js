@@ -16,6 +16,20 @@ const listHandler = {
       throw new Error(ex);
     }
   },
+  putById: (req, h) => {
+    try {
+      const boardId = req.params.boardId;
+      const listId = req.params.listId;
+      const ownedBy = req.triggered_by.id;
+      const list =
+        typeof req?.payload === "string"
+          ? JSON.parse(req.payload)
+          : req.payload;
+      return listService.updateList(boardId, listId, list, ownedBy);
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
   deleteById: (req, h) => {
     try {
       const boardId = req.params.boardId;
