@@ -17,6 +17,13 @@ const routes = [
     },
   },
   {
+    method: "get",
+    path: "/healthz",
+    handler: (request, h) => {
+      return "Kanbaneon API server is healthy";
+    },
+  },
+  {
     method: "post",
     path: "/api/v1/login",
     handler: loginHandler,

@@ -18,7 +18,7 @@ const login = async (username, password) => {
   return { success: result, token, id: user._id };
 };
 
-const signUp = async (username, password) => {
+const signUp = async (username, password, email) => {
   const collection = this.$db.collection("users");
   const existingUser = await collection.findOne({ username });
   if (existingUser) {
