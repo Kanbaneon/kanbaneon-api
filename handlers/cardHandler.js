@@ -43,6 +43,42 @@ const cardHandler = {
       throw new Error(ex);
     }
   },
+  swapExternal: (req, h) => {
+    try {
+      const boardId = req.params.boardId;
+      const ownedBy = req.triggered_by.id;
+      const { parentList, foundList } =
+        typeof req?.payload === "string"
+          ? JSON.parse(req.payload)
+          : req.payload;
+      return cardService.swapCardExternal(
+        boardId,
+        parentList,
+        foundList,
+        ownedBy
+      );
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
+  swapInternal: (req, h) => {
+    try {
+      const boardId = req.params.boardId;
+      const listId = req.params.listId;
+      const ownedBy = req.triggered_by.id;
+      const originalIndex = req.query.from;
+      const targetIndex = req.query.to;
+      return cardService.swapCardInternal(
+        boardId,
+        listId,
+        originalIndex,
+        targetIndex,
+        ownedBy
+      );
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
 };
 
 module.exports = { cardHandler };
