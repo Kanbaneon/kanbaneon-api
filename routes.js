@@ -11,13 +11,6 @@ const { guardJwt } = require("./services/guardService");
 const routes = [
   {
     method: "get",
-    path: "/",
-    handler: (request, h) => {
-      return "Kanbaneon API server";
-    },
-  },
-  {
-    method: "get",
     path: "/healthz",
     handler: (request, h) => {
       return "Kanbaneon API server is healthy";

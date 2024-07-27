@@ -6,15 +6,26 @@ const login = async (username, password) => {
   const collection = this.$db.collection("users");
   const user = await collection.findOne({ username });
   if (!user) {
-    return Boom.unauthorized("Login failed");
+    const userWithEmail = await collection.findOne({ email: username });
+    if (!userWithEmail) {
+      return Boom.unauthorized("Login failed");
+    }
+    return authorize(password, userWithEmail);
   }
+  return authorize(password, user);
+};
 
+const authorize = async (password, user) => {
   const result = await bcrypt.compare(password, user.password);
   if (!result) {
     return Boom.unauthorized("Login failed");
   }
 
-  const token = await generateJwt({ username, id: user._id });
+  const token = await generateJwt({
+    username: user.username,
+    id: user._id,
+    email: user.email,
+  });
   return { success: result, token, id: user._id };
 };
 
@@ -27,8 +38,15 @@ const signUp = async (username, password, email) => {
     );
   }
 
+  const existingEmail = await collection.findOne({ email });
+  if (existingEmail) {
+    return Boom.badData(
+      `There is already an email registered with "${email}". Try login your account`
+    );
+  }
+
   const hashedPassword = await hashPassword(password);
-  await collection.insertOne({ username, password: hashedPassword });
+  await collection.insertOne({ username, password: hashedPassword, email });
   return { success: true };
 };
 

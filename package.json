@@ -1,11 +1,11 @@
 {
 	"name": "kanbaneon-api",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Kanbaneon API server",
-	"main": "index.js",
+	"main": "server.js",
 	"scripts": {
-		"dev": "nodemon",
-		"start": "node index.js",
+		"dev": "nodemon server.js",
+		"start": "node server.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
@@ -30,9 +30,11 @@
 	"screenshots": [],
 	"dependencies": {
 		"@hapi/hapi": "^21.3.9",
+		"@hapi/inert": "^7.1.0",
 		"bcrypt": "^5.1.1",
 		"boom": "^7.3.0",
 		"dotenv": "^16.4.5",
+		"hapi-pino": "^12.1.0",
 		"joi": "^17.13.0",
 		"jsonwebtoken": "^9.0.2",
 		"mongodb": "^6.5.0"

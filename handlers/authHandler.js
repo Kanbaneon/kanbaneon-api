@@ -27,11 +27,11 @@ const reauthHandler = (req, h) => {
 
 const signUpHandler = (req, h) => {
   try {
-    const { username, password } = JSON.parse(req.payload);
-    if (!username || !password) {
-      return Boom.badRequest("Username or password is empty");
+    const { username, password, email } = JSON.parse(req.payload);
+    if (!username || !password || !email) {
+      return Boom.badRequest("Username/email or password is empty");
     }
-    return authService.signUp(username, password);
+    return authService.signUp(username, password, email);
   } catch (ex) {
     throw new Error(ex);
   }
@@ -40,5 +40,5 @@ const signUpHandler = (req, h) => {
 module.exports = {
   loginHandler,
   signUpHandler,
-  reauthHandler
+  reauthHandler,
 };
