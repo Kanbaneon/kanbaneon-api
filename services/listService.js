@@ -1,8 +1,8 @@
 const Boom = require("boom");
 
-const addList = async (boardId, addingList, ownedBy) => {
+const addList = async (req, boardId, addingList, ownedBy) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     const updatingBoard = await collection.findOne({ id: boardId, ownedBy });
     if (updatingBoard) {
       const kanbanList = updatingBoard.kanbanList;
@@ -22,9 +22,9 @@ const addList = async (boardId, addingList, ownedBy) => {
   }
 };
 
-const updateList = async (boardId, listId, list, ownedBy) => {
+const updateList = async (req, boardId, listId, list, ownedBy) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     const updatingBoard = await collection.findOne({ id: boardId, ownedBy });
     if (updatingBoard) {
       const updatingListIndex = updatingBoard.kanbanList.findIndex(
@@ -57,9 +57,9 @@ const updateList = async (boardId, listId, list, ownedBy) => {
   }
 };
 
-const deleteList = async (boardId, listId, ownedBy) => {
+const deleteList = async (req, boardId, listId, ownedBy) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     const updatingBoard = await collection.findOne({ id: boardId, ownedBy });
     if (updatingBoard) {
       const deletingList = updatingBoard.kanbanList.find(
@@ -90,9 +90,9 @@ const deleteList = async (boardId, listId, ownedBy) => {
   }
 };
 
-const swapList = async (boardId, originalIndex, targetIndex, ownedBy) => {
+const swapList = async (req, boardId, originalIndex, targetIndex, ownedBy) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     const updatingBoard = await collection.findOne({ id: boardId, ownedBy });
     if (updatingBoard) {
       const originalList = updatingBoard.kanbanList[originalIndex];

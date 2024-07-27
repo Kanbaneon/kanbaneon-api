@@ -7,7 +7,7 @@ const loginHandler = (req, h) => {
     if (!username || !password) {
       return Boom.badRequest("Username or password is empty");
     }
-    return authService.login(username, password);
+    return authService.login(req, username, password);
   } catch (ex) {
     throw new Error(ex);
   }
@@ -31,7 +31,7 @@ const signUpHandler = (req, h) => {
     if (!username || !password || !email) {
       return Boom.badRequest("Username/email or password is empty");
     }
-    return authService.signUp(username, password, email);
+    return authService.signUp(req, username, password, email);
   } catch (ex) {
     throw new Error(ex);
   }

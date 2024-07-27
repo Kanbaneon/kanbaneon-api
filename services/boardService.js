@@ -1,8 +1,8 @@
 const Boom = require("boom");
 
-const addBoard = async (id, kanbanList, name, ownedBy) => {
+const addBoard = async (req, id, kanbanList, name, ownedBy) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     await collection.insertOne({ id, kanbanList, name, ownedBy });
     return { success: true, board: { id, kanbanList, name, ownedBy } };
   } catch (ex) {
@@ -10,9 +10,9 @@ const addBoard = async (id, kanbanList, name, ownedBy) => {
   }
 };
 
-const updateBoard = async (id, board, ownedBy) => {
+const updateBoard = async (req, id, board, ownedBy) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     const updatingBoard = await collection.findOne({ id, ownedBy });
     if (updatingBoard) {
       await collection.findOneAndUpdate(
@@ -30,9 +30,9 @@ const updateBoard = async (id, board, ownedBy) => {
   }
 };
 
-const deleteBoard = async (id, ownedBy) => {
+const deleteBoard = async (req, id, ownedBy) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     const deletingBoard = await collection.findOne({ id, ownedBy });
     if (deletingBoard) {
       await collection.deleteOne({ id, ownedBy });
@@ -44,9 +44,9 @@ const deleteBoard = async (id, ownedBy) => {
   }
 };
 
-const getBoards = async (ownedBy) => {
+const getBoards = async (req, ownedBy) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     const boards = await collection.find({ ownedBy }).toArray();
     return { success: true, boards };
   } catch (ex) {
@@ -54,9 +54,9 @@ const getBoards = async (ownedBy) => {
   }
 };
 
-const getBoard = async (id) => {
+const getBoard = async (req, id) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     const board = await collection.findOne({ id });
     if (board) {
       return { success: true, board };

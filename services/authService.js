@@ -2,8 +2,8 @@ const bcrypt = require("bcrypt");
 const Boom = require("boom");
 const jwt = require("jsonwebtoken");
 
-const login = async (username, password) => {
-  const collection = this.$db.collection("users");
+const login = async (req, username, password) => {
+  const collection = req.mongo.db.collection("users");
   const user = await collection.findOne({ username });
   if (!user) {
     const userWithEmail = await collection.findOne({ email: username });
@@ -29,8 +29,8 @@ const authorize = async (password, user) => {
   return { success: result, token, id: user._id };
 };
 
-const signUp = async (username, password, email) => {
-  const collection = this.$db.collection("users");
+const signUp = async (req, username, password, email) => {
+  const collection = req.mongo.db.collection("users");
   const existingUser = await collection.findOne({ username });
   if (existingUser) {
     return Boom.badData(

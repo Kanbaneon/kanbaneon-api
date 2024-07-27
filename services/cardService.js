@@ -1,8 +1,8 @@
 const Boom = require("boom");
 
-const addCard = async (boardId, listId, addingCard, ownedBy) => {
+const addCard = async (req, boardId, listId, addingCard, ownedBy) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     const updatingBoard = await collection.findOne({
       id: boardId,
       "kanbanList.id": listId,
@@ -29,9 +29,9 @@ const addCard = async (boardId, listId, addingCard, ownedBy) => {
   }
 };
 
-const updateCard = async (boardId, listId, cardId, card, ownedBy) => {
+const updateCard = async (req, boardId, listId, cardId, card, ownedBy) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     const updatingBoard = await collection.findOne({
       id: boardId,
       "kanbanList.id": listId,
@@ -63,9 +63,9 @@ const updateCard = async (boardId, listId, cardId, card, ownedBy) => {
   }
 };
 
-const deleteCard = async (boardId, listId, cardId, ownedBy) => {
+const deleteCard = async (req, boardId, listId, cardId, ownedBy) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     const updatingBoard = await collection.findOne({
       id: boardId,
       "kanbanList.id": listId,
@@ -96,9 +96,15 @@ const deleteCard = async (boardId, listId, cardId, ownedBy) => {
   }
 };
 
-const swapCardExternal = async (boardId, originalList, targetList, ownedBy) => {
+const swapCardExternal = async (
+  req,
+  boardId,
+  originalList,
+  targetList,
+  ownedBy
+) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     const updatingBoard = await collection.findOne({ id: boardId, ownedBy });
     if (updatingBoard) {
       const originalIndex = updatingBoard.kanbanList.findIndex(
@@ -128,6 +134,7 @@ const swapCardExternal = async (boardId, originalList, targetList, ownedBy) => {
 };
 
 const swapCardInternal = async (
+  req,
   boardId,
   listId,
   originalIndex,
@@ -135,7 +142,7 @@ const swapCardInternal = async (
   ownedBy
 ) => {
   try {
-    const collection = this.$db.collection("boards");
+    const collection = req.mongo.db.collection("boards");
     const updatingBoard = await collection.findOne({
       id: boardId,
       "kanbanList.id": listId,

@@ -12,7 +12,7 @@ const cardHandler = {
           : req.payload;
       const ownedBy = req.triggered_by.id;
 
-      return cardService.addCard(boardId, listId, addingCard, ownedBy);
+      return cardService.addCard(req, boardId, listId, addingCard, ownedBy);
     } catch (ex) {
       throw new Error(ex);
     }
@@ -27,7 +27,14 @@ const cardHandler = {
         typeof req?.payload === "string"
           ? JSON.parse(req.payload)
           : req.payload;
-      return cardService.updateCard(boardId, listId, cardId, card, ownedBy);
+      return cardService.updateCard(
+        req,
+        boardId,
+        listId,
+        cardId,
+        card,
+        ownedBy
+      );
     } catch (ex) {
       throw new Error(ex);
     }
@@ -38,7 +45,7 @@ const cardHandler = {
       const listId = req.params.listId;
       const cardId = req.params.cardId;
       const ownedBy = req.triggered_by.id;
-      return cardService.deleteCard(boardId, listId, cardId, ownedBy);
+      return cardService.deleteCard(req, boardId, listId, cardId, ownedBy);
     } catch (ex) {
       throw new Error(ex);
     }
@@ -52,6 +59,7 @@ const cardHandler = {
           ? JSON.parse(req.payload)
           : req.payload;
       return cardService.swapCardExternal(
+        req,
         boardId,
         parentList,
         foundList,
@@ -69,6 +77,7 @@ const cardHandler = {
       const originalIndex = req.query.from;
       const targetIndex = req.query.to;
       return cardService.swapCardInternal(
+        req,
         boardId,
         listId,
         originalIndex,

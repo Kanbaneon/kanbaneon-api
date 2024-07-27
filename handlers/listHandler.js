@@ -11,7 +11,7 @@ const listHandler = {
           : req.payload;
       const ownedBy = req.triggered_by.id;
 
-      return listService.addList(boardId, addingList, ownedBy);
+      return listService.addList(req, boardId, addingList, ownedBy);
     } catch (ex) {
       throw new Error(ex);
     }
@@ -25,7 +25,7 @@ const listHandler = {
         typeof req?.payload === "string"
           ? JSON.parse(req.payload)
           : req.payload;
-      return listService.updateList(boardId, listId, list, ownedBy);
+      return listService.updateList(req, boardId, listId, list, ownedBy);
     } catch (ex) {
       throw new Error(ex);
     }
@@ -35,7 +35,7 @@ const listHandler = {
       const boardId = req.params.boardId;
       const listId = req.params.listId;
       const ownedBy = req.triggered_by.id;
-      return listService.deleteList(boardId, listId, ownedBy);
+      return listService.deleteList(req, boardId, listId, ownedBy);
     } catch (ex) {
       throw new Error(ex);
     }
@@ -46,7 +46,13 @@ const listHandler = {
       const originalIndex = req.query.from;
       const targetIndex = req.query.to;
       const ownedBy = req.triggered_by.id;
-      return listService.swapList(boardId, originalIndex, targetIndex, ownedBy);
+      return listService.swapList(
+        req,
+        boardId,
+        originalIndex,
+        targetIndex,
+        ownedBy
+      );
     } catch (ex) {
       throw new Error(ex);
     }

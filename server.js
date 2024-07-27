@@ -2,8 +2,8 @@
 
 const Hapi = require("@hapi/hapi");
 const routes = require("./routes");
-const { initDB } = require("./services/dbService");
 const dotenv = require("dotenv");
+const MongoDB = require("hapi-mongodb");
 
 const server = Hapi.server({
   port: 10000,
@@ -15,26 +15,35 @@ const server = Hapi.server({
 
 const init = async () => {
   dotenv.config();
-  this.$db = await initDB();
+  const url = process.env.DB_URL + process.env.DB_NAME;
+
+  await server.register({
+    plugin: MongoDB,
+    options: {
+      url,
+      decorate: true,
+    },
+  });
+
   await server.register([
     {
       plugin: require("@hapi/inert"),
-      options: {}
+      options: {},
     },
     {
       plugin: require("hapi-pino"),
       options: {
-        logEvents: ["response", "onPostStart"]
-      }
-    }]);
+        logEvents: ["response", "onPostStart"],
+      },
+    },
+  ]);
 
   server.route({
     method: "GET",
     path: "/",
     handler: (request, h) => {
-
       return h.file("./public/hello.html");
-    }
+    },
   });
   server.route(routes);
 
@@ -43,7 +52,6 @@ const init = async () => {
 };
 
 process.on("unhandledRejection", (err) => {
-
   console.log(err);
   process.exit(1);
 });
