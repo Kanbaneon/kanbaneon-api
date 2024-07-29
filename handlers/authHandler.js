@@ -37,8 +37,29 @@ const signUpHandler = (req, h) => {
   }
 };
 
+const profileHandler = {
+  get: (req, h) => {
+    try {
+      const userId = req.triggered_by.id;
+      return authService.getProfile(req, userId);
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
+  put: (req, h) => {
+    try {
+      const userId = req.triggered_by.id;
+      const { name, email } = JSON.parse(req.payload);
+      return authService.updateProfile(req, userId, name, email);
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
+};
+
 module.exports = {
   loginHandler,
   signUpHandler,
   reauthHandler,
+  profileHandler,
 };

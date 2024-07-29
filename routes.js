@@ -2,6 +2,7 @@ const {
   loginHandler,
   signUpHandler,
   reauthHandler,
+  profileHandler,
 } = require("./handlers/authHandler");
 const { boardHandler } = require("./handlers/boardHandler");
 const { listHandler } = require("./handlers/listHandler");
@@ -30,6 +31,16 @@ const routes = [
     method: "post",
     path: "/api/v1/reauth",
     handler: reauthHandler,
+  },
+  {
+    method: "get",
+    path: "/api/v1/profile",
+    handler: (req, h) => guardJwt(req, h, profileHandler.get),
+  },
+  {
+    method: "put",
+    path: "/api/v1/profile",
+    handler: (req, h) => guardJwt(req, h, profileHandler.put),
   },
   {
     method: "get",

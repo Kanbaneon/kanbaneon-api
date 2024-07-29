@@ -3,7 +3,13 @@ const Boom = require("boom");
 const addBoard = async (req, id, kanbanList, name, ownedBy) => {
   try {
     const collection = req.mongo.db.collection("boards");
-    await collection.insertOne({ id, kanbanList, name, ownedBy });
+    await collection.insertOne({
+      id,
+      kanbanList,
+      name,
+      ownedBy,
+      createdAt: new Date(),
+    });
     return { success: true, board: { id, kanbanList, name, ownedBy } };
   } catch (ex) {
     return Boom.notImplemented("Adding Board failed", ex);

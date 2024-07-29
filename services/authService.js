@@ -46,7 +46,12 @@ const signUp = async (req, username, password, email) => {
   }
 
   const hashedPassword = await hashPassword(password);
-  await collection.insertOne({ username, password: hashedPassword, email });
+  await collection.insertOne({
+    username,
+    password: hashedPassword,
+    email,
+    createdAt: new Date(),
+  });
   return { success: true };
 };
 
@@ -75,8 +80,68 @@ const hashPassword = async (pwd, saltRounds = 10) => {
   }
 };
 
+const getProfile = async (req, userId) => {
+  try {
+    const collection = req.mongo.db.collection("users");
+    const ObjectID = req.mongo.ObjectID;
+    const existingUser = await collection.findOne({
+      _id: new ObjectID(userId),
+    });
+    if (existingUser) {
+      return {
+        success: true,
+        user: {
+          id: existingUser.id,
+          username: existingUser.username,
+          email: existingUser.email,
+          name: existingUser.name,
+        },
+      };
+    }
+    return Boom.notFound("Getting profile failed", ex);
+  } catch (ex) {
+    console.error(ex);
+  }
+};
+
+const updateProfile = async (req, userId, email, name) => {
+  try {
+    const collection = req.mongo.db.collection("users");
+    const ObjectID = req.mongo.ObjectID;
+    const existingUser = await collection.findOne({
+      _id: new ObjectID(userId),
+    });
+    if (existingUser) {
+      await collection.findOneAndUpdate(
+        {
+          _id: new ObjectID(userId),
+        },
+        {
+          $set: { name, email },
+          $currentDate: { lastModified: true },
+        }
+      );
+
+      return {
+        success: true,
+        user: {
+          id: existingUser.id,
+          username: existingUser.username,
+          email,
+          name,
+        },
+      };
+    }
+    return Boom.notFound("Getting profile failed", ex);
+  } catch (ex) {
+    console.error(ex);
+  }
+};
+
 module.exports = {
   login,
   signUp,
   reauth,
+  getProfile,
+  updateProfile,
 };
