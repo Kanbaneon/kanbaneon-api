@@ -49,8 +49,8 @@ const profileHandler = {
   put: (req, h) => {
     try {
       const userId = req.triggered_by.id;
-      const { name, email } = JSON.parse(req.payload);
-      return authService.updateProfile(req, userId, name, email);
+      const { name, email, details } = JSON.parse(req.payload);
+      return authService.updateProfile(req, userId, name, email, details);
     } catch (ex) {
       throw new Error(ex);
     }

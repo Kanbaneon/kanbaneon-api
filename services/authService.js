@@ -80,6 +80,44 @@ const hashPassword = async (pwd, saltRounds = 10) => {
   }
 };
 
+const getDetails = async (req, userId) => {
+  try {
+    const collection = req.mongo.db.collection("profiles");
+    const existingProfile = await collection.findOne(
+      { userId },
+      { projection: { _id: 0, lastModified: 0, userId: 0 } }
+    );
+    if (existingProfile) {
+      return existingProfile;
+    }
+    return null;
+  } catch (ex) {
+    console.error(ex);
+  }
+};
+
+const updateDetails = async (req, userId, details) => {
+  try {
+    const { occupation, teams, organization, location } = details;
+    const collection = req.mongo.db.collection("profiles");
+    const updatedDetails = await collection.findOneAndUpdate(
+      { userId },
+      {
+        $set: { occupation, teams, organization, location },
+        $currentDate: { lastModified: true },
+      },
+      {
+        returnDocument: "after",
+        upsert: true,
+        projection: { _id: 0, lastModified: 0, userId: 0 },
+      }
+    );
+    return updatedDetails;
+  } catch (ex) {
+    console.error(ex);
+  }
+};
+
 const getProfile = async (req, userId) => {
   try {
     const collection = req.mongo.db.collection("users");
@@ -88,6 +126,8 @@ const getProfile = async (req, userId) => {
       _id: new ObjectID(userId),
     });
     if (existingUser) {
+      const details = await getDetails(req, userId);
+
       return {
         success: true,
         user: {
@@ -95,6 +135,7 @@ const getProfile = async (req, userId) => {
           username: existingUser.username,
           email: existingUser.email,
           name: existingUser.name,
+          details,
         },
       };
     }
@@ -104,7 +145,7 @@ const getProfile = async (req, userId) => {
   }
 };
 
-const updateProfile = async (req, userId, email, name) => {
+const updateProfile = async (req, userId, email, name, details) => {
   try {
     const collection = req.mongo.db.collection("users");
     const ObjectID = req.mongo.ObjectID;
@@ -122,6 +163,8 @@ const updateProfile = async (req, userId, email, name) => {
         }
       );
 
+      const updatedDetails = await updateDetails(req, userId, details);
+
       return {
         success: true,
         user: {
@@ -129,6 +172,7 @@ const updateProfile = async (req, userId, email, name) => {
           username: existingUser.username,
           email,
           name,
+          details: updatedDetails,
         },
       };
     }
