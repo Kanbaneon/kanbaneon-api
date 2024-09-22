@@ -98,12 +98,13 @@ const getDetails = async (req, userId) => {
 
 const updateDetails = async (req, userId, details) => {
   try {
-    const { occupation, teams, organization, location } = details;
+    const { occupation, teams, organization, location, profilePicture } =
+      details;
     const collection = req.mongo.db.collection("profiles");
     const updatedDetails = await collection.findOneAndUpdate(
       { userId },
       {
-        $set: { occupation, teams, organization, location },
+        $set: { occupation, teams, organization, location, profilePicture },
         $currentDate: { lastModified: true },
       },
       {
