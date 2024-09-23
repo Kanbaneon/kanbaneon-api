@@ -55,6 +55,15 @@ const profileHandler = {
       throw new Error(ex);
     }
   },
+  uploadPicture: (req, h) => {
+    try {
+      const userId = req.triggered_by.id;
+      const formData = req.payload.image;
+      return authService.uploadPicture(req, userId, formData, h);
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
 };
 
 module.exports = {

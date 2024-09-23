@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const Boom = require("boom");
 const jwt = require("jsonwebtoken");
+const fetch = require("node-fetch");
 
 const login = async (req, username, password) => {
   const collection = req.mongo.db.collection("users");
@@ -146,6 +147,49 @@ const getProfile = async (req, userId) => {
   }
 };
 
+const uploadPicture = async (req, userId, formData, h) => {
+  try {
+    const collection = req.mongo.db.collection("users");
+    const profileCollection = req.mongo.db.collection("profiles");
+    const ObjectID = req.mongo.ObjectID;
+    const existingUser = await collection.findOne({
+      _id: new ObjectID(userId),
+    });
+    if (existingUser) {
+      const response = await fetch(process.env.IMG_API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Client-ID ${process.env.IMG_API_KEY}`,
+        },
+        body: formData,
+      });
+
+      const imgData = await response.json();
+      if (imgData.success) {
+        const updatedDetails = await profileCollection.findOneAndUpdate(
+          { userId },
+          {
+            $set: { profilePicture: imgData.data },
+            $currentDate: { lastModified: true },
+          },
+          {
+            returnDocument: "after",
+            upsert: true,
+            projection: { _id: 0, lastModified: 0, userId: 0 },
+          }
+        );
+
+        return imgData;
+      }
+
+      return Boom.expectationFailed("Uploading profile picture failed");
+    }
+    return Boom.notFound("Getting profile failed", ex);
+  } catch (ex) {
+    console.error(ex);
+  }
+};
+
 const updateProfile = async (req, userId, email, name, details) => {
   try {
     const collection = req.mongo.db.collection("users");
@@ -189,4 +233,5 @@ module.exports = {
   reauth,
   getProfile,
   updateProfile,
+  uploadPicture,
 };

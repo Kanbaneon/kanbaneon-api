@@ -38,6 +38,20 @@ const routes = [
     handler: (req, h) => guardJwt(req, h, profileHandler.get),
   },
   {
+    method: "post",
+    path: "/api/v1/profile/picture",
+    config: {
+      payload: {
+        maxBytes: 1000 * 1000 * 10, // 10 Mb
+        parse: true,
+        output: 'stream',
+        allow: ['multipart/form-data'],
+        multipart: true
+      },
+    },
+    handler: (req, h) => guardJwt(req, h, profileHandler.uploadPicture),
+  },
+  {
     method: "put",
     path: "/api/v1/profile",
     handler: (req, h) => guardJwt(req, h, profileHandler.put),
