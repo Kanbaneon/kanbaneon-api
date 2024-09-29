@@ -1,0 +1,77 @@
+<html>
+  <body
+    id="{{ uuid }}"
+    style="
+      width: 90%;
+      padding: 20px;
+      background-color: whitesmoke;
+      height: 80vh;
+      line-height: 24px;
+    "
+  >
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="center">
+          <div
+            class="container"
+            style="
+              width: 80%;
+              padding: 20px;
+              background-color: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            "
+          >
+            <h2
+              class="title"
+              style="
+                display: inline;
+                font-size: 32px;
+                font-weight: bold;
+                color: #42b883;
+                cursor: pointer;
+              "
+            >
+              KAN<span class="subtitle" style="color: #35495e">BANEON</span>
+            </h2>
+            <h3>Your username</h3>
+            <div style="margin-top: 10px">
+              <p>
+                We heard that you forgot your Kanbaneon username. Sorry about
+                that!
+                <br />
+                But don’t worry! Below is the username that you have signed up
+                with us.
+              </p>
+              <div
+                style="
+                  padding: 12px;
+                  background-color: lightgray;
+                  font-size: 32px;
+                  width: 200px;
+                "
+              >
+                <b>{{ username }}</b>
+              </div>
+            </div>
+            <footer>
+              <h4>
+                Regards, <br />
+                The Kanbaneon Team
+              </h4>
+              <small
+                >Sent at {{ time }}
+                <br />
+
+                <span style="color: gray"
+                  >You're receiving this email because a username recovery was
+                  requested for your account.</span
+                >
+              </small>
+            </footer>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

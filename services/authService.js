@@ -1,7 +1,11 @@
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const Boom = require("boom");
 const jwt = require("jsonwebtoken");
 const fetch = require("node-fetch");
+const uuid = require("uuid");
+const { sendEmailHTML } = require("./emailService");
+const { readHTMLFile, fillTemplate } = require("./fileService");
 
 const login = async (req, username, password) => {
   const collection = req.mongo.db.collection("users");
@@ -78,6 +82,86 @@ const hashPassword = async (pwd, saltRounds = 10) => {
     return hashedPassword;
   } catch (ex) {
     console.error(ex);
+    return Boom.internal("[Error] ", ex);
+  }
+};
+
+const sendPasswordRecovery = async (req, username) => {
+  try {
+    const collection = req.mongo.db.collection("users");
+    const existingUser = await collection.findOne({ username });
+    if (existingUser) {
+      const html = await readHTMLFile(
+        "templates/Password_Recovery_Template.html"
+      );
+      const token = uuid.v7();
+      const createdAt = new Date();
+      const expiredAt = new Date();
+      expiredAt.setMinutes(createdAt.getMinutes() + 10);
+      await collection.findOneAndUpdate(
+        {
+          username,
+        },
+        {
+          $set: { resetToken: { value: token, createdAt, expiredAt } },
+          $currentDate: { lastModified: true },
+        }
+      );
+
+      const domain =
+        process.env.ENV === "local"
+          ? "http://localhost:3000"
+          : `https://kanbaneon.netlify.app`;
+      const templateReplacement = {
+        uuid: token,
+        passwordResetLink: `${domain}/recovery?token=${token}`,
+        time: createdAt.toLocaleTimeString("en-us", {
+          weekday: "long",
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }),
+      };
+      const template = fillTemplate(html, templateReplacement);
+      const email = existingUser.email;
+      sendEmailHTML("[Kanbaneon] Please reset your password", email, template);
+      return { success: true };
+    }
+    return Boom.notFound("There is no existing user.");
+  } catch (ex) {
+    console.error(ex);
+    return Boom.internal("[Error] ", ex);
+  }
+};
+
+const sendUsernameRecovery = async (req, email) => {
+  try {
+    const collection = req.mongo.db.collection("users");
+    const existingUser = await collection.findOne({ email });
+    if (existingUser) {
+      const html = await readHTMLFile(
+        "templates/Username_Recovery_Template.html"
+      );
+      const createdAt = new Date();
+      const templateReplacement = {
+        uuid: uuid.v4(),
+        username: existingUser.username,
+        time: createdAt.toLocaleTimeString("en-us", {
+          weekday: "long",
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }),
+      };
+      const template = fillTemplate(html, templateReplacement);
+      const email = existingUser.email;
+      sendEmailHTML("[Kanbaneon] Username recovery", email, template);
+      return { success: true };
+    }
+    return Boom.notFound("There is no existing user with this email.");
+  } catch (ex) {
+    console.error(ex);
+    return Boom.internal("[Error] ", ex);
   }
 };
 
@@ -91,9 +175,61 @@ const getDetails = async (req, userId) => {
     if (existingProfile) {
       return existingProfile;
     }
-    return null;
+    return {};
   } catch (ex) {
     console.error(ex);
+    return Boom.internal("[Error] ", ex);
+  }
+};
+
+const validateRecoveryToken = async (req, token) => {
+  try {
+    const collection = req.mongo.db.collection("users");
+    const existingUser = await collection.findOne({
+      "resetToken.value": token,
+    });
+    if (existingUser) {
+      if (existingUser.resetToken?.expiredAt > new Date()) {
+        return { success: true };
+      }
+      return Boom.expectationFailed("The link has expired.");
+    }
+    return Boom.notFound("The link has expired.");
+  } catch (ex) {
+    console.error(ex);
+    return Boom.internal("[Error] ", ex);
+  }
+};
+
+const updatePassword = async (req, token, password, confirmPassword) => {
+  try {
+    const collection = req.mongo.db.collection("users");
+    const existingUser = await collection.findOne({
+      "resetToken.value": token,
+    });
+    if (existingUser) {
+      if (existingUser.resetToken?.expiredAt > new Date()) {
+        if (password !== confirmPassword) {
+          return Boom.badRequest("Both passwords must match.");
+        }
+        const hashedPassword = await hashPassword(password);
+        await collection.findOneAndUpdate(
+          {
+            username: existingUser.username,
+          },
+          {
+            $set: { password: hashedPassword, resetToken: undefined },
+            $currentDate: { lastModified: true },
+          }
+        );
+        return { success: true };
+      }
+      return Boom.expectationFailed("The link has expired.");
+    }
+    return Boom.notFound("The link has expired.");
+  } catch (ex) {
+    console.error(ex);
+    return Boom.internal("[Error] ", ex);
   }
 };
 
@@ -117,6 +253,7 @@ const updateDetails = async (req, userId, details) => {
     return updatedDetails;
   } catch (ex) {
     console.error(ex);
+    return Boom.internal("[Error] ", ex);
   }
 };
 
@@ -144,6 +281,7 @@ const getProfile = async (req, userId) => {
     return Boom.notFound("Getting profile failed", ex);
   } catch (ex) {
     console.error(ex);
+    return Boom.internal("[Error] ", ex);
   }
 };
 
@@ -187,10 +325,11 @@ const uploadPicture = async (req, userId, formData, h) => {
     return Boom.notFound("Getting profile failed", ex);
   } catch (ex) {
     console.error(ex);
+    return Boom.internal("[Error] ", ex);
   }
 };
 
-const updateProfile = async (req, userId, email, name, details) => {
+const updateProfile = async (req, userId, name, email, details) => {
   try {
     const collection = req.mongo.db.collection("users");
     const ObjectID = req.mongo.ObjectID;
@@ -224,6 +363,7 @@ const updateProfile = async (req, userId, email, name, details) => {
     return Boom.notFound("Getting profile failed", ex);
   } catch (ex) {
     console.error(ex);
+    return Boom.internal("[Error] ", ex);
   }
 };
 
@@ -234,4 +374,8 @@ module.exports = {
   getProfile,
   updateProfile,
   uploadPicture,
+  sendPasswordRecovery,
+  sendUsernameRecovery,
+  validateRecoveryToken,
+  updatePassword,
 };

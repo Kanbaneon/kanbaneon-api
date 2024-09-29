@@ -2,6 +2,7 @@ const {
   loginHandler,
   signUpHandler,
   reauthHandler,
+  recoveryHandler,
   profileHandler,
 } = require("./handlers/authHandler");
 const { boardHandler } = require("./handlers/boardHandler");
@@ -33,6 +34,21 @@ const routes = [
     handler: reauthHandler,
   },
   {
+    method: "post",
+    path: "/api/v1/recovery",
+    handler: recoveryHandler.sendEmail,
+  },
+  {
+    method: "post",
+    path: "/api/v1/recovery/{token}",
+    handler: recoveryHandler.validateToken,
+  },
+  {
+    method: "post",
+    path: "/api/v1/recovery/{token}/password",
+    handler: recoveryHandler.changePassword,
+  },
+  {
     method: "get",
     path: "/api/v1/profile",
     handler: (req, h) => guardJwt(req, h, profileHandler.get),
@@ -44,9 +60,9 @@ const routes = [
       payload: {
         maxBytes: 1000 * 1000 * 10, // 10 Mb
         parse: true,
-        output: 'stream',
-        allow: ['multipart/form-data'],
-        multipart: true
+        output: "stream",
+        allow: ["multipart/form-data"],
+        multipart: true,
       },
     },
     handler: (req, h) => guardJwt(req, h, profileHandler.uploadPicture),
