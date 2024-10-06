@@ -8,6 +8,7 @@ const {
 const { boardHandler } = require("./handlers/boardHandler");
 const { listHandler } = require("./handlers/listHandler");
 const { cardHandler } = require("./handlers/cardHandler");
+const { userHandler } = require("./handlers/userHandler");
 const { guardJwt } = require("./services/guardService");
 
 const routes = [
@@ -47,6 +48,11 @@ const routes = [
     method: "post",
     path: "/api/v1/recovery/{token}/password",
     handler: recoveryHandler.changePassword,
+  },
+  {
+    method: "post",
+    path: "/api/v1/users/{username}/delete",
+    handler: (req, h) => guardJwt(req, h, userHandler.delete),
   },
   {
     method: "get",

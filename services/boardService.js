@@ -50,6 +50,16 @@ const deleteBoard = async (req, id, ownedBy) => {
   }
 };
 
+const deleteBoards = async (req, ownedBy) => {
+  try {
+    const collection = req.mongo.db.collection("boards");
+    await collection.deleteMany({ ownedBy });
+    return { success: true };
+  } catch (ex) {
+    return Boom.notImplemented("Deleting Boards failed", ex);
+  }
+};
+
 const getBoards = async (req, ownedBy) => {
   try {
     const collection = req.mongo.db.collection("boards");
@@ -77,6 +87,7 @@ module.exports = {
   addBoard,
   updateBoard,
   deleteBoard,
+  deleteBoards,
   getBoards,
   getBoard,
 };
