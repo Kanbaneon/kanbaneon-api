@@ -19,7 +19,7 @@ const reauthHandler = (req, h) => {
     if (!token) {
       return Boom.badRequest("Token is empty");
     }
-    return authService.reauth(token);
+    return authService.reauth(req, token);
   } catch (ex) {
     throw new Error(ex);
   }

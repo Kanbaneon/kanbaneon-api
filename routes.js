@@ -9,6 +9,7 @@ const { boardHandler } = require("./handlers/boardHandler");
 const { listHandler } = require("./handlers/listHandler");
 const { cardHandler } = require("./handlers/cardHandler");
 const { userHandler } = require("./handlers/userHandler");
+const { notificationHandler } = require("./handlers/notificationHandler");
 const { guardJwt } = require("./services/guardService");
 
 const routes = [
@@ -87,6 +88,11 @@ const routes = [
     method: "put",
     path: "/api/v1/profile",
     handler: (req, h) => guardJwt(req, h, profileHandler.put),
+  },
+  {
+    method: "get",
+    path: "/api/v1/notification",
+    handler: (req, h) => guardJwt(req, h, notificationHandler.get),
   },
   {
     method: "get",

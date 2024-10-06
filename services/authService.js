@@ -6,6 +6,7 @@ const fetch = require("node-fetch");
 const uuid = require("uuid");
 const { sendEmailHTML } = require("./emailService");
 const { readHTMLFile, fillTemplate } = require("./fileService");
+const { createNotification } = require("./notificationService");
 
 const login = async (req, usernameOrEmail, password) => {
   const isEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g.test(usernameOrEmail);
@@ -39,37 +40,76 @@ const authorize = async (password, user) => {
 };
 
 const signUp = async (req, username, password, email) => {
-  const collection = req.mongo.db.collection("users");
-  const existingUser = await collection.findOne({ username });
-  if (existingUser) {
-    return Boom.badData(
-      `There is already a user called "${username}". Try login your account`
-    );
-  }
+  try {
+    const collection = req.mongo.db.collection("users");
+    const existingUser = await collection.findOne({ username });
+    if (existingUser) {
+      return Boom.badData(
+        `There is already a user called "${username}". Try login your account`
+      );
+    }
 
-  const existingEmail = await collection.findOne({ email });
-  if (existingEmail) {
-    return Boom.badData(
-      `There is already an email registered with "${email}". Try login your account`
-    );
-  }
+    const existingEmail = await collection.findOne({ email });
+    if (existingEmail) {
+      return Boom.badData(
+        `There is already an email registered with "${email}". Try login your account`
+      );
+    }
 
-  const hashedPassword = await hashPassword(password);
-  await collection.insertOne({
-    username,
-    password: hashedPassword,
-    email,
-    createdAt: new Date(),
-  });
-  return { success: true };
+    const hashedPassword = await hashPassword(password);
+    const createdAt = new Date();
+    const insertedUser = await collection.insertOne({
+      username,
+      password: hashedPassword,
+      email,
+      createdAt,
+    });
+    await createNotification(req, JSON.parse(JSON.stringify(insertedUser)).insertedId);
+
+    const html = await readHTMLFile("templates/User_Welcome_Template.html");
+    const domain =
+      process.env.ENV === "local"
+        ? "http://localhost:3000"
+        : `https://kanbaneon.netlify.app`;
+    const templateReplacement = {
+      uuid: uuid.v4(),
+      username,
+      serviceLink: `${domain}/login`,
+      time: createdAt.toLocaleTimeString("en-us", {
+        weekday: "long",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }),
+    };
+    const template = fillTemplate(html, templateReplacement);
+    sendEmailHTML("[Kanbaneon] Welcome to our platform", email, template);
+
+    return { success: true };
+  } catch (ex) {
+    return Boom.internal("[Error] ", ex);
+  }
 };
 
-const reauth = async (token) => {
-  const decodedData = jwt.verify(token, process.env.JWT_SECRET);
-  if (!decodedData && decodedData.exp > new Date()) {
-    return Boom.unauthorized("Reauth failed");
+const reauth = async (req, token) => {
+  try {
+    const collection = req.mongo.db.collection("users");
+    const decodedData = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decodedData && decodedData.exp > new Date()) {
+      return Boom.unauthorized("Reauth failed");
+    }
+    const { id } = decodedData;
+    const ObjectID = req.mongo.ObjectID;
+    const existingUser = await collection.findOne({ _id: new ObjectID(id) });
+    if (!existingUser) {
+      return Boom.notFound("There is no existing user.");
+    }
+
+    return { success: true, reauth: decodedData };
+  } catch (ex) {
+    console.error(ex);
+    return Boom.internal("[Error] ", ex);
   }
-  return { success: true, reauth: decodedData };
 };
 
 const generateJwt = async (payload) => {
@@ -326,7 +366,7 @@ const getProfile = async (req, userId) => {
         },
       };
     }
-    return Boom.notFound("Getting profile failed", ex);
+    return Boom.notFound("Getting profile failed");
   } catch (ex) {
     console.error(ex);
     return Boom.internal("[Error] ", ex);
@@ -341,7 +381,7 @@ const deletePicture = async (req, userId) => {
         userId,
       },
       {
-        $set: { "profilePicture": {} },
+        $set: { profilePicture: {} },
       },
       {
         returnDocument: "after",
