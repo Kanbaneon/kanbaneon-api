@@ -69,6 +69,11 @@ const routes = [
   },
   {
     method: "put",
+    path: "/api/v1/profile/username",
+    handler: (req, h) => guardJwt(req, h, profileHandler.changeUsername),
+  },
+  {
+    method: "put",
     path: "/api/v1/profile",
     handler: (req, h) => guardJwt(req, h, profileHandler.put),
   },

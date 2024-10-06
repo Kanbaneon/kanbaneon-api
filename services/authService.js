@@ -7,15 +7,19 @@ const uuid = require("uuid");
 const { sendEmailHTML } = require("./emailService");
 const { readHTMLFile, fillTemplate } = require("./fileService");
 
-const login = async (req, username, password) => {
+const login = async (req, usernameOrEmail, password) => {
+  const isEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g.test(usernameOrEmail);
   const collection = req.mongo.db.collection("users");
-  const user = await collection.findOne({ username });
-  if (!user) {
-    const userWithEmail = await collection.findOne({ email: username });
+  if (isEmail) {
+    const userWithEmail = await collection.findOne({ email: usernameOrEmail });
     if (!userWithEmail) {
       return Boom.unauthorized("Login failed");
     }
     return authorize(password, userWithEmail);
+  }
+  const user = await collection.findOne({ username: usernameOrEmail });
+  if (!user) {
+    return Boom.unauthorized("Login failed");
   }
   return authorize(password, user);
 };
@@ -201,6 +205,49 @@ const validateRecoveryToken = async (req, token) => {
   }
 };
 
+const updateUsername = async (req, userId, username) => {
+  try {
+    const collection = req.mongo.db.collection("users");
+    const anotherUser = await collection.findOne({
+      username,
+    });
+    if (anotherUser) {
+      return Boom.expectationFailed(
+        "There is already another user with this username. Please choose another username."
+      );
+    }
+
+    const ObjectID = req.mongo.ObjectID;
+    const existingUser = await collection.findOne({
+      _id: new ObjectID(userId),
+    });
+    if (existingUser) {
+      const updatedUser = await collection.findOneAndUpdate(
+        existingUser,
+        {
+          $set: { username },
+          $currentDate: { lastModified: true },
+        },
+        {
+          returnDocument: "after",
+          projection: { _id: 0, lastModified: 0, userId: 0 },
+        }
+      );
+
+      const token = await generateJwt({
+        username: updatedUser.username,
+        id: existingUser._id,
+        email: updatedUser.email,
+      });
+      return { success: true, token };
+    }
+    return Boom.notFound("There is no existing user.");
+  } catch (ex) {
+    console.error(ex);
+    return Boom.internal("[Error] ", ex);
+  }
+};
+
 const updatePassword = async (req, token, password, confirmPassword) => {
   try {
     const collection = req.mongo.db.collection("users");
@@ -218,7 +265,8 @@ const updatePassword = async (req, token, password, confirmPassword) => {
             username: existingUser.username,
           },
           {
-            $set: { password: hashedPassword, resetToken: undefined },
+            $set: { password: hashedPassword },
+            $unset: { resetToken: 1 },
             $currentDate: { lastModified: true },
           }
         );
@@ -285,7 +333,7 @@ const getProfile = async (req, userId) => {
   }
 };
 
-const uploadPicture = async (req, userId, formData, h) => {
+const uploadPicture = async (req, userId, formData) => {
   try {
     const collection = req.mongo.db.collection("users");
     const profileCollection = req.mongo.db.collection("profiles");
@@ -317,7 +365,7 @@ const uploadPicture = async (req, userId, formData, h) => {
           }
         );
 
-        return imgData;
+        return { success: true, details: updatedDetails };
       }
 
       return Boom.expectationFailed("Uploading profile picture failed");
@@ -372,10 +420,11 @@ module.exports = {
   signUp,
   reauth,
   getProfile,
+  updateUsername,
+  updatePassword,
   updateProfile,
   uploadPicture,
   sendPasswordRecovery,
   sendUsernameRecovery,
   validateRecoveryToken,
-  updatePassword,
 };

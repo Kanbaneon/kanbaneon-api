@@ -3,11 +3,11 @@ const authService = require("../services/authService");
 
 const loginHandler = (req, h) => {
   try {
-    const { username, password } = JSON.parse(req.payload);
-    if (!username || !password) {
-      return Boom.badRequest("Username or password is empty");
+    const { username: usernameOrEmail, password } = JSON.parse(req.payload);
+    if (!usernameOrEmail || !password) {
+      return Boom.badRequest("Username/Email or password is empty");
     }
-    return authService.login(req, username, password);
+    return authService.login(req, usernameOrEmail, password);
   } catch (ex) {
     throw new Error(ex);
   }
@@ -97,11 +97,20 @@ const profileHandler = {
     try {
       const userId = req.triggered_by.id;
       const formData = req.payload.image;
-      return authService.uploadPicture(req, userId, formData, h);
+      return authService.uploadPicture(req, userId, formData);
     } catch (ex) {
       throw new Error(ex);
     }
   },
+  changeUsername: (req, h) => {
+    try {
+      const userId = req.triggered_by.id;
+      const { username } = JSON.parse(req.payload);
+      return authService.updateUsername(req, userId, username);
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  }
 };
 
 module.exports = {
