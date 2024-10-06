@@ -102,6 +102,14 @@ const profileHandler = {
       throw new Error(ex);
     }
   },
+  deletePicture: (req, h) => {
+    try {
+      const userId = req.triggered_by.id;
+      return authService.deletePicture(req, userId);
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
   changeUsername: (req, h) => {
     try {
       const userId = req.triggered_by.id;
@@ -110,7 +118,7 @@ const profileHandler = {
     } catch (ex) {
       throw new Error(ex);
     }
-  }
+  },
 };
 
 module.exports = {

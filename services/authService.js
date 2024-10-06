@@ -333,6 +333,29 @@ const getProfile = async (req, userId) => {
   }
 };
 
+const deletePicture = async (req, userId) => {
+  try {
+    const profileCollection = req.mongo.db.collection("profiles");
+    const updatedProfile = await profileCollection.findOneAndUpdate(
+      {
+        userId,
+      },
+      {
+        $set: { "profilePicture": {} },
+      },
+      {
+        returnDocument: "after",
+        upsert: true,
+        projection: { _id: 0, lastModified: 0, userId: 0 },
+      }
+    );
+    return { success: true, details: updatedProfile };
+  } catch (ex) {
+    console.error(ex);
+    return Boom.internal("[Error] ", ex);
+  }
+};
+
 const uploadPicture = async (req, userId, formData) => {
   try {
     const collection = req.mongo.db.collection("users");
@@ -424,6 +447,7 @@ module.exports = {
   updatePassword,
   updateProfile,
   uploadPicture,
+  deletePicture,
   sendPasswordRecovery,
   sendUsernameRecovery,
   validateRecoveryToken,

@@ -74,6 +74,11 @@ const routes = [
     handler: (req, h) => guardJwt(req, h, profileHandler.uploadPicture),
   },
   {
+    method: "delete",
+    path: "/api/v1/profile/picture",
+    handler: (req, h) => guardJwt(req, h, profileHandler.deletePicture),
+  },
+  {
     method: "put",
     path: "/api/v1/profile/username",
     handler: (req, h) => guardJwt(req, h, profileHandler.changeUsername),
