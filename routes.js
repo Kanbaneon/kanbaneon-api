@@ -95,6 +95,11 @@ const routes = [
     handler: (req, h) => guardJwt(req, h, notificationHandler.get),
   },
   {
+    method: "put",
+    path: "/api/v1/notification",
+    handler: (req, h) => guardJwt(req, h, notificationHandler.put),
+  },
+  {
     method: "get",
     path: "/api/v1/boards",
     handler: (req, h) => guardJwt(req, h, boardHandler.get),

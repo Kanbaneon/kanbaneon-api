@@ -11,7 +11,15 @@ const notificationHandler = {
     }
   },
   post: (req, h) => {},
-  put: (req, h) => {},
+  put: (req, h) => {
+    try {
+      const userId = req.triggered_by.id;
+      const notification = JSON.parse(req.payload);
+      return notificationService.updateNotification(req, userId, notification);
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
   delete: (req, h) => {},
 };
 

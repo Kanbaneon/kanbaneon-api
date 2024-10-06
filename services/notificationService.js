@@ -7,7 +7,7 @@ const createNotification = async (req, userId) => {
       userId,
       newsletter: true,
       watchlists: [],
-      lastModified: new Date()
+      lastModified: new Date(),
     });
   } catch (ex) {
     console.error(ex);
@@ -31,7 +31,30 @@ const getNotification = async (req, userId) => {
   }
 };
 
+const updateNotification = async (req, userId, payload) => {
+  try {
+    const collection = req.mongo.db.collection("notifications");
+    const notification = await collection.findOneAndUpdate(
+      {
+        userId,
+      },
+      {
+        $set: {
+          newsletter: payload.newsletter,
+          watchlists: payload.watchlists,
+        },
+      },
+      { projection: { _id: 0, lastModified: 0, userId: 0 } }
+    );
+    return { success: true, notification };
+  } catch (ex) {
+    console.error(ex);
+    return Boom.internal("[Error] ", ex);
+  }
+};
+
 module.exports = {
   createNotification,
   getNotification,
+  updateNotification,
 };
