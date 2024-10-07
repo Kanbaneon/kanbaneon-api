@@ -42,6 +42,30 @@ const getNotification = async (req, userId) => {
 const updateNotification = async (req, userId, payload) => {
   try {
     const collection = req.mongo.db.collection("notifications");
+    const boardCollection = req.mongo.db.collection("boards");
+    const unwatchedItems = payload.watchlists.filter(
+      (item) => item.isWatching === false || item.isDeleted === true
+    );
+
+    if (!!unwatchedItems.length) {
+      await boardCollection.updateMany(
+        {
+          id: { $in: unwatchedItems.map((item) => item.boardId) },
+          ownedBy: userId,
+        },
+        {
+          $set: { "kanbanList.$[xxx].children.$[xxxx].isWatching": false },
+          $currentDate: { lastModified: true },
+        },
+        {
+          arrayFilters: [
+            { "xxx.id": { $in: unwatchedItems.map((item) => item.listId) } },
+            { "xxxx.id": { $in: unwatchedItems.map((item) => item.cardId) } },
+          ],
+        }
+      );
+    }
+
     const notification = await collection.findOneAndUpdate(
       {
         userId,
@@ -49,11 +73,14 @@ const updateNotification = async (req, userId, payload) => {
       {
         $set: {
           newsletter: payload.newsletter,
-          watchlists: payload.watchlists
+          watchlists: payload.watchlists.filter((item) => !item.isDeleted),
         },
         $currentDate: { lastModified: true },
       },
-      { projection: { _id: 0, lastModified: 0, userId: 0 } }
+      {
+        returnDocument: "after",
+        projection: { _id: 0, lastModified: 0, userId: 0 },
+      }
     );
     return { success: true, notification };
   } catch (ex) {
@@ -73,7 +100,10 @@ const addWatchList = async (req, userId, watchlistItem) => {
         $push: { watchlists: watchlistItem },
         $currentDate: { lastModified: true },
       },
-      { projection: { _id: 0, lastModified: 0, userId: 0 } }
+      {
+        returnDocument: "after",
+        projection: { _id: 0, lastModified: 0, userId: 0 },
+      }
     );
     return { success: true, notification };
   } catch (ex) {
@@ -92,7 +122,10 @@ const deleteWatchList = async (req, userId, cardId) => {
       {
         $pull: { watchlists: { cardId } },
       },
-      { projection: { _id: 0, lastModified: 0, userId: 0 } }
+      {
+        returnDocument: "after",
+        projection: { _id: 0, lastModified: 0, userId: 0 },
+      }
     );
     return { success: true, notification };
   } catch (ex) {
