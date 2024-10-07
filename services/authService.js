@@ -64,7 +64,10 @@ const signUp = async (req, username, password, email) => {
       email,
       createdAt,
     });
-    await addNotification(req, JSON.parse(JSON.stringify(insertedUser)).insertedId);
+    await addNotification(
+      req,
+      JSON.parse(JSON.stringify(insertedUser)).insertedId
+    );
 
     const html = await readHTMLFile("templates/User_Welcome_Template.html");
     const domain =
@@ -226,6 +229,25 @@ const getDetails = async (req, userId) => {
   }
 };
 
+const getManyDetails = async (req, userIds) => {
+  try {
+    const collection = req.mongo.db.collection("profiles");
+    const existingProfiles = await collection
+      .find(
+        { userId: { $in: userIds } },
+        { projection: { _id: 0, lastModified: 0, userId: 0 } }
+      )
+      .toArray();
+    if (!!existingProfiles?.length) {
+      return existingProfiles;
+    }
+    return [];
+  } catch (ex) {
+    console.error(ex);
+    return Boom.internal("[Error] ", ex);
+  }
+};
+
 const validateRecoveryToken = async (req, token) => {
   try {
     const collection = req.mongo.db.collection("users");
@@ -373,6 +395,46 @@ const getProfile = async (req, userId) => {
   }
 };
 
+const getProfiles = async (req, userId, ids) => {
+  try {
+    const collection = req.mongo.db.collection("users");
+    const ObjectID = req.mongo.ObjectID;
+    const existingUsers = await collection
+      .find(
+        {
+          _id: { $in: ids.map((id) => new ObjectID(id)) },
+        },
+        {
+          projection: { _id: 0, password: 0 },
+        }
+      )
+      .toArray();
+    if (existingUsers.length) {
+      const detailList = await getManyDetails(
+        req,
+        existingUsers.map((user) => user._id)
+      );
+
+      return {
+        success: true,
+        users: existingUsers.map((user) => {
+          const details = detailList.find(
+            (detail) => detail.userId === user.id
+          );
+          return {
+            ...user,
+            details,
+          };
+        }),
+      };
+    }
+    return Boom.notFound("Getting profile failed");
+  } catch (ex) {
+    console.error(ex);
+    return Boom.internal("[Error] ", ex);
+  }
+};
+
 const deletePicture = async (req, userId) => {
   try {
     const profileCollection = req.mongo.db.collection("profiles");
@@ -483,6 +545,7 @@ module.exports = {
   signUp,
   reauth,
   getProfile,
+  getProfiles,
   updateUsername,
   updatePassword,
   updateProfile,

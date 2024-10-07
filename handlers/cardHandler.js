@@ -22,7 +22,7 @@ const cardHandler = {
       const boardId = req.params.boardId;
       const listId = req.params.listId;
       const cardId = req.params.cardId;
-      const ownedBy = req.triggered_by.id;
+      const triggeredBy = req.triggered_by.id;
       const card =
         typeof req?.payload === "string"
           ? JSON.parse(req.payload)
@@ -33,7 +33,7 @@ const cardHandler = {
         listId,
         cardId,
         card,
-        ownedBy
+        triggeredBy
       );
     } catch (ex) {
       throw new Error(ex);

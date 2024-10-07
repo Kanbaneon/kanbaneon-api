@@ -84,6 +84,15 @@ const profileHandler = {
       throw new Error(ex);
     }
   },
+  getMany: (req, h) => {
+    try {
+      const userId = req.triggered_by.id;
+      const ids = req.query.ids.split(",");
+      return authService.getProfiles(req, userId, ids);
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
   put: (req, h) => {
     try {
       const userId = req.triggered_by.id;
