@@ -1,4 +1,5 @@
 const Boom = require("boom");
+const { deleteWatchList } = require("./notificationService");
 
 const addList = async (req, boardId, addingList, ownedBy) => {
   try {
@@ -78,6 +79,7 @@ const deleteList = async (req, boardId, listId, ownedBy) => {
             $currentDate: { lastModified: true },
           }
         );
+        await deleteWatchList(req, ownedBy, listId, "listId");
         return { success: true, board: updatingBoard };
       }
       return Boom.notFound(

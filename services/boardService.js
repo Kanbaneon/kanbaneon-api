@@ -1,4 +1,5 @@
 const Boom = require("boom");
+const { deleteWatchList } = require("./notificationService");
 
 const addBoard = async (req, id, kanbanList, name, ownedBy) => {
   try {
@@ -42,6 +43,7 @@ const deleteBoard = async (req, id, ownedBy) => {
     const deletingBoard = await collection.findOne({ id, ownedBy });
     if (deletingBoard) {
       await collection.deleteOne({ id, ownedBy });
+      await deleteWatchList(req, ownedBy, id, "boardId");
       return { success: true, board: {} };
     }
     return Boom.unauthorized(new Error("Not an owner of this board"));

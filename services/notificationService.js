@@ -112,7 +112,7 @@ const addWatchList = async (req, userId, watchlistItem) => {
   }
 };
 
-const deleteWatchList = async (req, userId, cardId) => {
+const deleteWatchList = async (req, userId, indicatorId, type) => {
   try {
     const collection = req.mongo.db.collection("notifications");
     const notification = await collection.findOneAndUpdate(
@@ -120,7 +120,7 @@ const deleteWatchList = async (req, userId, cardId) => {
         userId,
       },
       {
-        $pull: { watchlists: { cardId } },
+        $pull: { watchlists: { [type]: indicatorId } },
       },
       {
         returnDocument: "after",

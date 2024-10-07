@@ -87,7 +87,7 @@ const updateCard = async (req, boardId, listId, cardId, card, ownedBy) => {
 
         await addWatchList(req, ownedBy, newWatchListItem);
       } else {
-        await deleteWatchList(req, ownedBy, cardId);
+        await deleteWatchList(req, ownedBy, cardId, "cardId");
       }
       return { success: true, board };
     }
@@ -122,6 +122,7 @@ const deleteCard = async (req, boardId, listId, cardId, ownedBy) => {
           returnDocument: "after",
         }
       );
+      await deleteWatchList(req, ownedBy, cardId, "cardId");
       return { success: true, board };
     }
     return Boom.unauthorized(new Error("Not an owner of this board and card"));
