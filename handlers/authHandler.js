@@ -98,6 +98,14 @@ const profileHandler = {
       throw new Error(ex);
     }
   },
+  searchMany: (req, h) => {
+    try {
+      const { searchText } = req.params;
+      return authService.searchProfiles(req, searchText);
+    } catch (ex) {
+      throw new Error(ex);
+    }
+  },
   put: (req, h) => {
     try {
       const userId = req.triggered_by.id;

@@ -71,6 +71,11 @@ const routes = [
     handler: (req, h) => guardJwt(req, h, profileHandler.getMany),
   },
   {
+    method: "get",
+    path: "/api/v1/profiles/{searchText}",
+    handler: (req, h) => guardJwt(req, h, profileHandler.searchMany),
+  },
+  {
     method: "post",
     path: "/api/v1/profile/picture",
     config: {

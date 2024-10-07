@@ -235,7 +235,7 @@ const getManyDetails = async (req, userIds) => {
     const existingProfiles = await collection
       .find(
         { userId: { $in: userIds } },
-        { projection: { _id: 0, lastModified: 0, userId: 0 } }
+        { projection: { _id: 0, lastModified: 0 } }
       )
       .toArray();
     if (!!existingProfiles?.length) {
@@ -353,7 +353,7 @@ const updatePasswordInApp = async (req, password, confirmPassword) => {
     const ObjectID = req.mongo.ObjectID;
     await collection.findOneAndUpdate(
       {
-        _id: new ObjectID(req.triggered_by.id)
+        _id: new ObjectID(req.triggered_by.id),
       },
       {
         $set: { password: hashedPassword },
@@ -428,6 +428,45 @@ const getProfiles = async (req, userId, ids) => {
       .find(
         {
           _id: { $in: ids.map((id) => new ObjectID(id)) },
+        },
+        {
+          projection: { password: 0 },
+        }
+      )
+      .toArray();
+    if (existingUsers.length) {
+      const detailList = await getManyDetails(
+        req,
+        existingUsers.map((user) => JSON.parse(JSON.stringify(user))._id)
+      );
+
+      return {
+        success: true,
+        users: existingUsers.map((user) => {
+          const details = detailList.find(
+            (detail) => detail.userId === user.id
+          );
+          return {
+            ...user,
+            details,
+          };
+        }),
+      };
+    }
+    return Boom.notFound("Getting profile failed");
+  } catch (ex) {
+    console.error(ex);
+    return Boom.internal("[Error] ", ex);
+  }
+};
+
+const searchProfiles = async (req, searchText) => {
+  try {
+    const collection = req.mongo.db.collection("users");
+    const existingUsers = await collection
+      .find(
+        {
+          username: new RegExp(searchText),
         },
         {
           projection: { password: 0 },
@@ -571,6 +610,7 @@ module.exports = {
   reauth,
   getProfile,
   getProfiles,
+  searchProfiles,
   updateUsername,
   updatePassword,
   updatePasswordInApp,
