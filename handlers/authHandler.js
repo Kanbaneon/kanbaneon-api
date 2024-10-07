@@ -67,7 +67,12 @@ const recoveryHandler = {
   },
   changePassword: (req, h) => {
     try {
-      const { password, confirmPassword, token } = JSON.parse(req.payload);
+      const { password, confirmPassword, token, inApp } = JSON.parse(
+        req.payload
+      );
+      if (inApp) {
+        return authService.updatePasswordInApp(req, password, confirmPassword);
+      }
       return authService.updatePassword(req, token, password, confirmPassword);
     } catch (ex) {
       throw new Error(ex);

@@ -343,6 +343,31 @@ const updatePassword = async (req, token, password, confirmPassword) => {
   }
 };
 
+const updatePasswordInApp = async (req, password, confirmPassword) => {
+  try {
+    const collection = req.mongo.db.collection("users");
+    if (password !== confirmPassword) {
+      return Boom.badRequest("Both passwords must match.");
+    }
+    const hashedPassword = await hashPassword(password);
+    const ObjectID = req.mongo.ObjectID;
+    await collection.findOneAndUpdate(
+      {
+        _id: new ObjectID(req.triggered_by.id)
+      },
+      {
+        $set: { password: hashedPassword },
+        $unset: { resetToken: 1 },
+        $currentDate: { lastModified: true },
+      }
+    );
+    return { success: true };
+  } catch (ex) {
+    console.error(ex);
+    return Boom.internal("[Error] ", ex);
+  }
+};
+
 const updateDetails = async (req, userId, details) => {
   try {
     const { occupation, teams, organization, location, profilePicture } =
@@ -405,14 +430,14 @@ const getProfiles = async (req, userId, ids) => {
           _id: { $in: ids.map((id) => new ObjectID(id)) },
         },
         {
-          projection: { _id: 0, password: 0 },
+          projection: { password: 0 },
         }
       )
       .toArray();
     if (existingUsers.length) {
       const detailList = await getManyDetails(
         req,
-        existingUsers.map((user) => user._id)
+        existingUsers.map((user) => JSON.parse(JSON.stringify(user))._id)
       );
 
       return {
@@ -548,6 +573,7 @@ module.exports = {
   getProfiles,
   updateUsername,
   updatePassword,
+  updatePasswordInApp,
   updateProfile,
   uploadPicture,
   deletePicture,

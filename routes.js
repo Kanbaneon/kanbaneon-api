@@ -47,8 +47,13 @@ const routes = [
   },
   {
     method: "post",
-    path: "/api/v1/recovery/{token}/password",
+    path: "/api/v1/recovery/password",
     handler: recoveryHandler.changePassword,
+  },
+  {
+    method: "post",
+    path: "/api/v1/recovery/in-app/password",
+    handler: (req, h) => guardJwt(req, h, recoveryHandler.changePassword),
   },
   {
     method: "post",
