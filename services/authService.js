@@ -6,7 +6,7 @@ const fetch = require("node-fetch");
 const uuid = require("uuid");
 const { sendEmailHTML } = require("./emailService");
 const { readHTMLFile, fillTemplate } = require("./fileService");
-const { createNotification } = require("./notificationService");
+const { addNotification } = require("./notificationService");
 
 const login = async (req, usernameOrEmail, password) => {
   const isEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g.test(usernameOrEmail);
@@ -64,7 +64,7 @@ const signUp = async (req, username, password, email) => {
       email,
       createdAt,
     });
-    await createNotification(req, JSON.parse(JSON.stringify(insertedUser)).insertedId);
+    await addNotification(req, JSON.parse(JSON.stringify(insertedUser)).insertedId);
 
     const html = await readHTMLFile("templates/User_Welcome_Template.html");
     const domain =

@@ -1,4 +1,10 @@
 const Boom = require("boom");
+const {
+  updateWatchList,
+  addWatchList,
+  deleteWatchList,
+} = require("./notificationService");
+const uuid = require("uuid");
 
 const addCard = async (req, boardId, listId, addingCard, ownedBy) => {
   try {
@@ -21,6 +27,19 @@ const addCard = async (req, boardId, listId, addingCard, ownedBy) => {
         },
         { arrayFilters: [{ "xxx.id": listId }] }
       );
+      if (addingCard.isWatching) {
+        const newWatchListItem = {
+          id: uuid.v4(),
+          boardId,
+          listId,
+          cardId: addingCard.id,
+          type: "card",
+          isWatching: true,
+          lastModified: new Date(),
+        };
+
+        await addWatchList(req, ownedBy, newWatchListItem);
+      }
       return { success: true, board: updatingBoard };
     }
     return Boom.unauthorized(new Error("Not an owner of this board and list"));
@@ -55,6 +74,21 @@ const updateCard = async (req, boardId, listId, cardId, card, ownedBy) => {
           returnDocument: "after",
         }
       );
+      if (card.isWatching) {
+        const newWatchListItem = {
+          id: uuid.v4(),
+          boardId,
+          listId,
+          cardId,
+          type: "card",
+          isWatching: true,
+          lastModified: new Date(),
+        };
+
+        await addWatchList(req, ownedBy, newWatchListItem);
+      } else {
+        await deleteWatchList(req, ownedBy, cardId);
+      }
       return { success: true, board };
     }
     return Boom.unauthorized(new Error("Not an owner of this board and card"));
