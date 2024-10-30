@@ -6,7 +6,7 @@ const dotenv = require("dotenv");
 const MongoDB = require("hapi-mongodb");
 
 const server = Hapi.server({
-  port: 10000,
+  port: process.env.PORT || 10000,
   host: "0.0.0.0",
   routes: {
     cors: true,
